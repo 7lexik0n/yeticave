@@ -1,11 +1,14 @@
 <?php
     require_once('functions.php');
     require_once('lots.php');
-    $lot = null;
+    $lot = null;    
     if (isset($_GET['id'])) {
         $lot = $_GET['id'];
-        $lotData = $stuff[$lot];
     }
+    if ((!$lot) || ($lot >= count($stuff))) {
+        http_response_code(404);
+    }
+    $lotData = $stuff[$lot];
     $is_auth = (bool) rand(0, 1);
     $user_name = 'Константин';
     $user_avatar = 'img/user.jpg';  
