@@ -1,38 +1,31 @@
 <?php
-    require_once('functions.php');
-    require_once('lots.php');
-    $is_auth = (bool) rand(0, 1);
-    $user_name = 'Константин';
-    $user_avatar = 'img/user.jpg';  
-    $lot = null;    
-    if (isset($_GET['id'])) {
-        $lot = $_GET['id'];
-    }
-    if ((!$lot) || ($lot >= count($stuff))) {
-        http_response_code(404);
-    }
-    if (!array_key_exists($lot, $stuff)) {
-        print('ОШИБКА 404: СТРАНИЦА НЕ НАЙДЕНА!');
-    } else {
-        $lotData = $stuff[$lot]; 
+    $errors = $templateData['errors'] ?? [];
+    $info = [
+        'lot-name' => $templateData['info']['lot-name'] ?? '',
+        'category' => $templateData['info']['category'] ?? 'Выберите категорию',
+        'message' => $templateData['info']['message'] ?? '',
+        'lot-rate' => $templateData['info']['lot-rate'] ?? '',
+        'lot-step' => $templateData['info']['lot-step'] ?? '',
+        'lot-date' => $templateData['info']['lot-date'] ?? ''
+    ];    
 ?>
+
 
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title><?= $lotData['Название']; ?></title>
-  <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
-  <link href="css/normalize.min.css" rel="stylesheet">
-  <link href="css/style.css" rel="stylesheet">
+  <title>Добавление лота</title>
+  <link href="../css/normalize.min.css" rel="stylesheet">
+  <link href="../css/style.css" rel="stylesheet">
 </head>
 <body>
 
 <header class="main-header">
   <div class="main-header__container container">
     <h1 class="visually-hidden">YetiCave</h1>
-    <a class="main-header__logo" href="index.php">
-      <img src="img/logo.svg" width="160" height="39" alt="Логотип компании YetiCave">
+    <a class="main-header__logo" href="../index.php">
+      <img src="../img/logo.svg" width="160" height="39" alt="Логотип компании YetiCave">
     </a>
     <form class="main-header__search" method="get" action="https://echo.htmlacademy.ru">
       <input type="search" name="search" placeholder="Поиск лота">
@@ -40,27 +33,14 @@
     </form>
     <a class="main-header__add-lot button" href="add-lot.html">Добавить лот</a>
     <nav class="user-menu">
-      <?php if ($is_auth) : ?>
-
-            <div class="user-menu__image">
-                <img src="<?=$user_avatar?>" src="40" height="40" alt="Пользователь">
-            </div>
-            <div class="user-menu__logged">
-                <p><?=$user_name?></p>
-            </div>
-
-            <?php else : ?>
-
-            <ul class="user-menu__list">
-                <li class="user-menu__item">
-                    <a href="#">Регистрация</a>
-                </li>
-                <li class="user-menu__item">
-                    <a href="#">Вход</a>
-                </li>
-            </ul>
-
-        <?php endif; ?>
+      <ul class="user-menu__list">
+        <li class="user-menu__item">
+          <a href="sign-up.html">Регистрация</a>
+        </li>
+        <li class="user-menu__item">
+          <a href="login.html">Вход</a>
+        </li>
+      </ul>
     </nav>
   </div>
 </header>
@@ -88,96 +68,68 @@
       </li>
     </ul>
   </nav>
-  <section class="lot-item container">
-    <h2><?= $lotData['Название']; ?></h2>
-    <div class="lot-item__content">
-      <div class="lot-item__left">
-        <div class="lot-item__image">
-          <img src="<?= safeData($lotData['URL картинки']); ?>" width="730" height="548" alt="Сноуборд">
-        </div>
-        <p class="lot-item__category">Категория: <span><?= $lotData['Категория']; ?></span></p>
-        <p class="lot-item__description"><?= $lotData['Название']; ?></p>
+  <form class="form form--add-lot container form--invalid <?php if(count($errors)) : ?> form--invalid<?php endif; ?>" action="../add.php" method="POST" enctype="multipart/form-data">
+    <h2>Добавление лота</h2>
+    <div class="form__container-two">
+      <div class="form__item <?php if(array_key_exists('lot-name', $errors)) : ?> form__item--invalid<?php endif; ?>">
+        <label for="lot-name">Наименование</label>
+        <input id="lot-name" type="text" name="lot-name" placeholder="Введите наименование лота" value="<?=$info['lot-name'];?>">
+        <span class="form__error"><?php if (array_key_exists('lot-name', $errors)) print($errors['lot-name']) ?></span>
       </div>
-      <div class="lot-item__right">
-        <div class="lot-item__state">
-          <div class="lot-item__timer timer">
-            <?= timeLeft(15, 03, 2019, 00, 00, 00); ?>
-          </div>
-          <div class="lot-item__cost-state">
-            <div class="lot-item__rate">
-              <span class="lot-item__amount">Текущая цена</span>
-              <span class="lot-item__cost"><?= addRouble(safeData($lotData['Цена'])); ?></span>
-            </div>
-            <div class="lot-item__min-cost">
-              Мин. ставка <span><?= addRouble(safeData($lotData['Цена'])); ?></span>
-            </div>
-          </div>
-          <form class="lot-item__form" action="https://echo.htmlacademy.ru" method="post">
-            <p class="lot-item__form-item">
-              <label for="cost">Ваша ставка</label>
-              <input id="cost" type="number" name="cost" placeholder="<?= $lotData['Цена']; ?>">
-            </p>
-            <button type="submit" class="button">Сделать ставку</button>
-          </form>
-        </div>
-        <div class="history">
-          <h3>История ставок (<span>10</span>)</h3>
-          <table class="history__list">
-            <tr class="history__item">
-              <td class="history__name">Иван</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">5 минут назад</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Константин</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">20 минут назад</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Евгений</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">Час назад</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Игорь</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 08:21</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Енакентий</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 13:20</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Семён</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 12:20</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Илья</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 10:20</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Енакентий</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 13:20</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Семён</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 12:20</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Илья</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 10:20</td>
-            </tr>
-          </table>
-        </div>
+      <div class="form__item <?php if (array_key_exists('category', $errors)) : ?> form__item--invalid<?php endif;?>">
+        <label for="category">Категория</label>
+        <select id="category" name="category">
+          <option disabled>Выберите категорию</option>
+          <option>Доски и лыжи</option>
+          <option>Крепления</option>
+          <option>Ботинки</option>
+          <option>Одежда</option>
+          <option>Инструменты</option>
+          <option>Разное</option>
+        </select>
+        <span class="form__error"><?php if (array_key_exists('category', $errors)) print($errors['category']) ?></span>
       </div>
     </div>
-  </section>
+    <div class="form__item form__item--wide <?php if (array_key_exists('message', $errors)) : ?> form__item--invalid<?php endif;?>">
+      <label for="message">Описание</label>
+      <textarea id="message" name="message" placeholder="Напишите описание лота"><?=$info['message'];?></textarea>
+      <span class="form__error"><?php if (array_key_exists('message', $errors)) print($errors['message']) ?></span>
+    </div>
+    <div class="form__item form__item--file"> <!-- form__item--uploaded -->
+      <label>Изображение</label>
+      <div class="preview">
+        <button class="preview__remove" type="button">x</button>
+        <div class="preview__img">
+          <img src="img/avatar.jpg" width="113" height="113" alt="Изображение лота">
+        </div>
+      </div>
+      <div class="form__input-file">
+        <input class="visually-hidden" type="file" id="photo2" value="">
+        <label for="photo2">
+          <span>+ Добавить</span>
+        </label>
+      </div>
+    </div>
+    <div class="form__container-three">
+      <div class="form__item form__item--small <?php if (array_key_exists('lot-rate', $errors)) : ?> form__item--invalid<?php endif;?>">
+        <label for="lot-rate">Начальная цена</label>
+        <input id="lot-rate" type="number" name="lot-rate" placeholder="0" value="<?=$info['lot-rate'];?>">
+        <span class="form__error"><?php if (array_key_exists('lot-rate', $errors)) print($errors['lot-rate']) ?></span>
+      </div>
+      <div class="form__item form__item--small <?php if (array_key_exists('lot-step', $errors)) : ?> form__item--invalid<?php endif;?>">
+        <label for="lot-step">Шаг ставки</label>
+        <input id="lot-step" type="number" name="lot-step" placeholder="0" value="<?=$info['lot-step'];?>">
+        <span class="form__error"><?php if (array_key_exists('lot-step', $errors)) print($errors['lot-step']) ?></span>
+      </div>
+      <div class="form__item <?php if (array_key_exists('lot-date', $errors)) : ?> form__item--invalid<?php endif;?>">
+        <label for="lot-date">Дата окончания торгов</label>
+        <input class="form__input-date" id="lot-date" type="date" name="lot-date" value="<?=$info['lot-date'];?>">
+        <span class="form__error"><?php if (array_key_exists('lot-date', $errors)) print($errors['lot-date']) ?></span>
+      </div>
+    </div>
+    <span class="form__error form__error--bottom"><?php if(count($errors)) print('Пожалуйста, исправьте ошибки в форме!'); ?> </span>
+    <button type="submit" class="button">Добавить лот</button>
+  </form>
 </main>
 
 <footer class="main-footer">
@@ -242,7 +194,3 @@
 
 </body>
 </html>
-
-<?php
-    }
-?>
