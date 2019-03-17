@@ -17,13 +17,26 @@
         
         $info = $_POST;
         
+        if (isset($_FILES['picture'])) {
+            $tmp_name = $_FILES['picture']['tmp_name'];
+            $path = $_FILES['picture']['name'];
+            move_uploaded_file($tmp_name, 'img/' . $path);
+            $info['path'] = $path;
+        }
+        else {
+            $errors['file'] = 'Вы не загрузили файл!';
+        }
+        
         if (count($errors)) {
             $content = getTemplate('templates/addLot.php', [
                 'errors' => $errors,
                 'info' => $info
             ]);            
         } else {
-            
+            require_once('functions.php');
+            $content = getTemplate('templates/newLot.php', [
+                'lot' => $info
+            ]);
         }
         print($content);
     } else print('НЕ POST');

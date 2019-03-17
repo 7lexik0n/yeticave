@@ -19,10 +19,23 @@
         return $str;
     }
 
-    function timeLeft($day, $month, $year, $hour, $minutes, $seconds) {
+    function timeLeft($day, $month, $year, $hour, $minutes) {
         date_default_timezone_set('Europe/Moscow');
-        $timeStr = $year . "-" . $month . "-" . $day . "T" . $hour . ":" . $minutes . ":" . $seconds;
+        $timeStr = $year . "-" . $month . "-" . $day . "T" . $hour . ":" . $minutes;
         $finishTime = strtotime($timeStr);
+        $curTime = strtotime("now");
+        $timeLeft = $finishTime - $curTime;
+        $hLeft = floor($timeLeft/3600);
+        $mLeft = floor(($timeLeft - $hLeft*3600)/60);
+        if ($hLeft < 10) $hLeft = '0' . $hLeft;
+        if ($mLeft < 10) $mLeft = '0' . $mLeft;
+        $result = $hLeft . ":" . $mLeft;
+        return $result;
+    }
+
+    function timeLeftShort($date) {
+        date_default_timezone_set('Europe/Moscow');
+        $finishTime = strtotime($date);
         $curTime = strtotime("now");
         $timeLeft = $finishTime - $curTime;
         $hLeft = floor($timeLeft/3600);
