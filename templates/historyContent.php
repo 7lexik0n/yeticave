@@ -1,49 +1,18 @@
 <?php
-    require_once('functions.php');
-    require_once('lots.php');
-    $is_auth = (bool) rand(0, 1);
-    $user_name = 'Константин';
-    $user_avatar = 'img/user.jpg';  
-    $lot = null;    
-    if (isset($_GET['id'])) {
-        $lot = $_GET['id'];
+    $lots = $templateData['lots'];
+    $lotsID = $templateData['lotsID'];
+    $visitedLots = [];
+    foreach ($lotsID as $key => $value) {
+        array_push($visitedLots, $lots[$value]);
+        $visitedLots[$key]['id'] = $value;
     }
-    if ((!$lot) || ($lot >= count($stuff))) {
-        http_response_code(404);
-    }
-    if (!array_key_exists($lot, $stuff)) {
-        print('ОШИБКА 404: СТРАНИЦА НЕ НАЙДЕНА!');
-    } else {
-        $lotData = $stuff[$lot]; 
-        $cookieName = 'visitedLots';
-        $expire = strtotime("+30 days");
-        $path = "/";
-        if (isset($_COOKIE[$cookieName])) {
-            $cookieValue = json_decode($_COOKIE[$cookieName]);
-            $matches = 0;
-            foreach ($cookieValue as $key => $value) {
-                if ($value == $lot) $matches++;
-            }
-            if ($matches == 0) {
-                array_push($cookieValue, $lot);
-                $cookieValue = json_encode($cookieValue);
-                setcookie($cookieName, $cookieValue, $expire, $path);
-            }
-        }
-        else {
-            $cookieValue = [];
-            array_push($cookieValue, $lot);
-            $cookieValue = json_encode($cookieValue);
-            setcookie($cookieName, $cookieValue, $expire, $path);
-        }
 ?>
 
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title><?= $lotData['Название']; ?></title>
-  <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
+  <title>История просмотров</title>
   <link href="css/normalize.min.css" rel="stylesheet">
   <link href="css/style.css" rel="stylesheet">
 </head>
@@ -61,27 +30,14 @@
     </form>
     <a class="main-header__add-lot button" href="add-lot.html">Добавить лот</a>
     <nav class="user-menu">
-      <?php if ($is_auth) : ?>
-
-            <div class="user-menu__image">
-                <img src="<?=$user_avatar?>" src="40" height="40" alt="Пользователь">
-            </div>
-            <div class="user-menu__logged">
-                <p><?=$user_name?></p>
-            </div>
-
-            <?php else : ?>
-
-            <ul class="user-menu__list">
-                <li class="user-menu__item">
-                    <a href="#">Регистрация</a>
-                </li>
-                <li class="user-menu__item">
-                    <a href="#">Вход</a>
-                </li>
-            </ul>
-
-        <?php endif; ?>
+      <ul class="user-menu__list">
+        <li class="user-menu__item">
+          <a href="sign-up.html">Регистрация</a>
+        </li>
+        <li class="user-menu__item">
+          <a href="login.html">Вход</a>
+        </li>
+      </ul>
     </nav>
   </div>
 </header>
@@ -89,7 +45,7 @@
 <main>
   <nav class="nav">
     <ul class="nav__list container">
-      <li class="nav__item">
+      <li class="nav__item nav__item--current">
         <a href="all-lots.html">Доски и лыжи</a>
       </li>
       <li class="nav__item">
@@ -109,96 +65,39 @@
       </li>
     </ul>
   </nav>
-  <section class="lot-item container">
-    <h2><?= $lotData['Название']; ?></h2>
-    <div class="lot-item__content">
-      <div class="lot-item__left">
-        <div class="lot-item__image">
-          <img src="<?= safeData($lotData['URL картинки']); ?>" width="730" height="548" alt="Сноуборд">
-        </div>
-        <p class="lot-item__category">Категория: <span><?= $lotData['Категория']; ?></span></p>
-        <p class="lot-item__description"><?= $lotData['Название']; ?></p>
-      </div>
-      <div class="lot-item__right">
-        <div class="lot-item__state">
-          <div class="lot-item__timer timer">
-            <?= timeLeft(15, 03, 2019, 00, 00, 00); ?>
+  <div class="container">
+    <section class="lots">
+      <h2>Просмотренные ранее лоты</h2>
+      <ul class="lots__list">
+       <?php foreach($visitedLots as $key => $val) : ?>
+        <li class="lots__item lot">
+          <div class="lot__image">
+            <img src="<?= safeData($val['URL картинки']); ?>" width="350" height="260" alt="<?= safeData($val['Название']); ?>">
           </div>
-          <div class="lot-item__cost-state">
-            <div class="lot-item__rate">
-              <span class="lot-item__amount">Текущая цена</span>
-              <span class="lot-item__cost"><?= addRouble(safeData($lotData['Цена'])); ?></span>
-            </div>
-            <div class="lot-item__min-cost">
-              Мин. ставка <span><?= addRouble(safeData($lotData['Цена'])); ?></span>
+          <div class="lot__info">
+            <span class="lot__category"><?= safeData($val['Категория']); ?></span>
+            <h3 class="lot__title"><a class="text-link" href="../lot.php?id=<?= safeData($val['id']); ?>"><?= safeData($val['Название']); ?></a></h3>
+            <div class="lot__state">
+              <div class="lot__rate">
+                <span class="lot__amount">Стартовая цена</span>
+                <span class="lot__cost"><?= addRouble(safeData($val['Цена'])); ?></span>
+              </div>
+              <div class="lot__timer timer"><?= timeLeft(19, 03, 2019, 00, 00, 00); ?></div>
             </div>
           </div>
-          <form class="lot-item__form" action="https://echo.htmlacademy.ru" method="post">
-            <p class="lot-item__form-item">
-              <label for="cost">Ваша ставка</label>
-              <input id="cost" type="number" name="cost" placeholder="<?= $lotData['Цена']; ?>">
-            </p>
-            <button type="submit" class="button">Сделать ставку</button>
-          </form>
-        </div>
-        <div class="history">
-          <h3>История ставок (<span>10</span>)</h3>
-          <table class="history__list">
-            <tr class="history__item">
-              <td class="history__name">Иван</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">5 минут назад</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Константин</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">20 минут назад</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Евгений</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">Час назад</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Игорь</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 08:21</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Енакентий</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 13:20</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Семён</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 12:20</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Илья</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 10:20</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Енакентий</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 13:20</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Семён</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 12:20</td>
-            </tr>
-            <tr class="history__item">
-              <td class="history__name">Илья</td>
-              <td class="history__price">10 999 р</td>
-              <td class="history__time">19.03.17 в 10:20</td>
-            </tr>
-          </table>
-        </div>
-      </div>
-    </div>
-  </section>
+        </li>
+        <?php endforeach; ?>
+      </ul>
+    </section>
+    <ul class="pagination-list">
+      <li class="pagination-item pagination-item-prev"><a>Назад</a></li>
+      <li class="pagination-item pagination-item-active"><a>1</a></li>
+      <li class="pagination-item"><a href="#">2</a></li>
+      <li class="pagination-item"><a href="#">3</a></li>
+      <li class="pagination-item"><a href="#">4</a></li>
+      <li class="pagination-item pagination-item-next"><a href="#">Вперед</a></li>
+    </ul>
+  </div>
 </main>
 
 <footer class="main-footer">
@@ -263,7 +162,3 @@
 
 </body>
 </html>
-
-<?php
-    }
-?>
