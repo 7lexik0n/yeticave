@@ -45,4 +45,13 @@
         $result = $hLeft . ":" . $mLeft;
         return $result;
     }
+
+    function searchUserByEmail($email, $users) {
+        for ($i = 0; $i < count($users); $i++) {
+            if ($users[$i]['email'] == $email) {
+                return $users[$i];
+            }
+        }
+        return false;
+    }
 ?>
