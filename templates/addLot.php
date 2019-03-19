@@ -1,4 +1,8 @@
 <?php
+    session_start();
+    if (!isset($_SESSION['user'])) {
+        http_response_code(403);
+    }
     $errors = $templateData['errors'] ?? [];
     $info = [
         'lot-name' => $templateData['info']['lot-name'] ?? '',
@@ -33,14 +37,30 @@
     </form>
     <a class="main-header__add-lot button" href="add-lot.html">Добавить лот</a>
     <nav class="user-menu">
-      <ul class="user-menu__list">
-        <li class="user-menu__item">
-          <a href="sign-up.html">Регистрация</a>
-        </li>
-        <li class="user-menu__item">
-          <a href="login.html">Вход</a>
-        </li>
-      </ul>
+      <?php if (isset($_SESSION['user']['name'])) : ?>
+
+<!--
+            <div class="user-menu__image">
+                <img src="<?=$user_avatar?>" src="40" height="40" alt="Пользователь">
+            </div>
+-->
+            <div class="user-menu__logged">
+                <p><?=$_SESSION['user']['name']?></p>
+                <a href="logout.php">Выход</a>
+            </div>
+
+            <?php else : ?>
+
+            <ul class="user-menu__list">
+                <li class="user-menu__item">
+                    <a href="#">Регистрация</a>
+                </li>
+                <li class="user-menu__item">
+                    <a href="#">Вход</a>
+                </li>
+            </ul>
+
+        <?php endif; ?>
     </nav>
   </div>
 </header>
@@ -68,6 +88,7 @@
       </li>
     </ul>
   </nav>
+  <?php if (isset($_SESSION['user'])): ?> 
   <form class="form form--add-lot container form--invalid <?php if(count($errors)) : ?> form--invalid<?php endif; ?>" action="../add.php" method="POST" enctype="multipart/form-data">
     <h2>Добавление лота</h2>
     <div class="form__container-two">
@@ -130,6 +151,10 @@
     <span class="form__error form__error--bottom"><?php if(count($errors)) print('Пожалуйста, исправьте ошибки в форме!'); ?> </span>
     <button type="submit" class="button">Добавить лот</button>
   </form>
+  <?php else:
+        print('Ошибка 403: страница доступна только авторизованным пользователям!');
+    endif;
+  ?>
 </main>
 
 <footer class="main-footer">

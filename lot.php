@@ -1,4 +1,5 @@
 <?php
+    session_start();
     require_once('functions.php');
     require_once('lots.php');
     $is_auth = (bool) rand(0, 1);
@@ -61,13 +62,16 @@
     </form>
     <a class="main-header__add-lot button" href="add-lot.html">Добавить лот</a>
     <nav class="user-menu">
-      <?php if ($is_auth) : ?>
+      <?php if (isset($_SESSION['user']['name'])) : ?>
 
+<!--
             <div class="user-menu__image">
                 <img src="<?=$user_avatar?>" src="40" height="40" alt="Пользователь">
             </div>
+-->
             <div class="user-menu__logged">
-                <p><?=$user_name?></p>
+                <p><?=$_SESSION['user']['name']?></p>
+                <a href="logout.php">Выход</a>
             </div>
 
             <?php else : ?>
@@ -120,6 +124,7 @@
         <p class="lot-item__description"><?= $lotData['Название']; ?></p>
       </div>
       <div class="lot-item__right">
+       <?php if (isset($_SESSION['user']['name'])): ?>
         <div class="lot-item__state">
           <div class="lot-item__timer timer">
             <?= timeLeft(15, 03, 2019, 00, 00, 00); ?>
@@ -141,6 +146,7 @@
             <button type="submit" class="button">Сделать ставку</button>
           </form>
         </div>
+        <?php endif; ?>
         <div class="history">
           <h3>История ставок (<span>10</span>)</h3>
           <table class="history__list">

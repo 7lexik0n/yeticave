@@ -1,10 +1,8 @@
 <?php
     $title = $templateData['title'];
     $catContent = $templateData['catContent'];
-    $content = $templateData['content'];
-    $is_auth = (bool) rand(0, 1);
-    $user_name = 'Константин';
-    $user_avatar = 'img/user.jpg';      
+    $content = $templateData['content'];  
+    $user = $templateData['user'] ?? '';
 ?>
 
 <!DOCTYPE html>
@@ -28,17 +26,21 @@
             <input type="search" name="search" placeholder="Поиск лота">
             <input class="main-header__search-btn" type="submit" name="find" value="Найти">
         </form>
+        
         <a class="main-header__add-lot button" href="templates/addLot.php">Добавить лот</a>
 
         <nav class="user-menu">
 
-            <?php if ($is_auth) : ?>
+            <?php if (isset($user['name'])) : ?>
 
+<!--
             <div class="user-menu__image">
                 <img src="<?=$user_avatar?>" src="40" height="40" alt="Пользователь">
             </div>
+-->
             <div class="user-menu__logged">
-                <p><?=$user_name?></p>
+                <p>Добро пожаловать, <?=$user['name']?></p>
+                <a href="logout.php">Выход</a>
             </div>
 
             <?php else : ?>
@@ -48,7 +50,7 @@
                     <a href="#">Регистрация</a>
                 </li>
                 <li class="user-menu__item">
-                    <a href="#">Вход</a>
+                    <a href="login.php">Вход</a>
                 </li>
             </ul>
 
