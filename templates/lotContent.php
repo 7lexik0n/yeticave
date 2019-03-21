@@ -7,7 +7,7 @@
     <div class="lot-item__content">
       <div class="lot-item__left">
         <div class="lot-item__image">
-          <img src="<?=safeData($lotData['path'] ?? $lotData['URL картинки']);?>" width="730" height="548" alt="Сноуборд">
+          <img src="<?=safeData($lotData['path'] ?? $lotData['URL картинки']);?>" width="730" height="548" alt="<?=safeData($lotData['lot-name'] ?? $lotData['Название']);?>">
         </div>
         <p class="lot-item__category">Категория: <span><?=safeData($lotData['category'] ?? $lotData['Категория']);?></span></p>
         <p class="lot-item__description"><?=safeData($lotData['message'] ?? $lotData['Название']);?></p>
