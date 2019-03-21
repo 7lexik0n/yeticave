@@ -2,7 +2,32 @@
     session_start();
 
     require_once('functions.php');
+    require_once('categories.php');
     require_once('userdata.php');    
+
+    $head = getTemplate('templates/head.php', [
+        'title' => 'YetiCave Вход'
+    ]);
+    if (isset($_SESSION['user'])) {
+        $user = $_SESSION['user'];
+        $header = getTemplate('templates/header.php', [
+            'user' => $user
+        ]);
+    } else {
+        $header = getTemplate('templates/header.php', []);
+    }
+    $catContent = getTemplate('templates/categories.php', [
+        'categories' => $categories
+    ]);
+    $footer = getTemplate('templates/footer.php', [
+        'catContent' => $catContent
+    ]);
+    $options = [
+        'head' => $head,
+        'header' => $header,
+        'catContent' => $catContent,
+        'footer' => $footer
+    ];
     
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $form = $_POST;
@@ -15,10 +40,12 @@
         };
         $info = $form;
         if (count($errors)) {
-            $content = getTemplate('templates/login.php', [
+            $addOptions = [
                 'errors' => $errors,
                 'info' => $info
-            ]);
+            ];
+            $options += $addOptions;
+            $content = getTemplate('templates/login.php', $options);
         } elseif ($user = searchUserByEmail($form['email'], $users)) {
             if (password_verify($form['password'], $user['password'])) {
                 $_SESSION['user'] = $user;
@@ -27,18 +54,23 @@
             }
             else {
                 $errors['password'] = 'Пароль не верен!';
-                $content = getTemplate('templates/login.php', [
+                $addOptions = [
                     'errors' => $errors
-                ]);
+                ];
+                $options += $addOptions;
+                $content = getTemplate('templates/login.php', $options);
             }
         } else {
             $errors['email'] = 'Пользователь не найден!';
-            $content = getTemplate('templates/login.php', [
+            $addOptions = [
                 'errors' => $errors
-            ]);            
+            ];
+            $options += $addOptions;
+            $content = getTemplate('templates/login.php', $options);            
         }
         print($content);
     } else {
-        print(getTemplate('templates/login.php', []));
+        $mainContent = getTemplate('templates/login.php', $options);
+        print($mainContent);
     }
 ?>

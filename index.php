@@ -1,40 +1,52 @@
 <?php
     session_start();
 
-    require_once 'functions.php';
-    require_once 'lots.php'; 
+    require_once 'categories.php';
+    require_once 'lots.php';
+    require_once 'functions.php';    
 
-    $categories = ['Доски и лыжи', 'Крепления', 'Ботинки', 'Одежда', 'Инструменты', 'Разное'];
+    $head = getTemplate('templates/head.php', [
+        'title' => 'YetiCave Главная'
+    ]);    
+
+    $lots = getTemplate('templates/stuff.php', [
+        'stuff' => $stuff
+    ]);    
+
+    $main_content = getTemplate('templates/index.php', [
+        'lots' => $lots,
+        'categories' => $categories
+    ]);
 
     $catContent = getTemplate('templates/categories.php', [
         'categories' => $categories
     ]);
 
-    $lots = getTemplate('templates/stuff.php', [
-        'stuff' => $stuff
+    $footer = getTemplate('templates/footer.php', [
+        'catContent' => $catContent
     ]);
 
-    $main_content = getTemplate('templates/index.php', [
-        'lots' => $lots
-    ]);
-
-      if (isset($_SESSION['user'])) {
+    if (isset($_SESSION['user'])) {
         $user = $_SESSION['user'];
-        $layout_content = getTemplate('templates/layout.php', [
-            'title' => 'YetiCave Главная',
-            'catContent' => $catContent,
-            'content' => $main_content,
+        $header = getTemplate('templates/header.php', [
             'user' => $user
         ]);
-      } else {
-          $layout_content = getTemplate('templates/layout.php', [
-            'title' => 'YetiCave Главная',
-            'catContent' => $catContent,
-            'content' => $main_content
+        $layout_content = getTemplate('templates/layout.php', [
+            'head' => $head,
+            'header' => $header,
+            'content' => $main_content,
+            'footer' => $footer,
+            'user' => $user
         ]);
-      }
-
-    
+    } else {
+        $header = getTemplate('templates/header.php', []);
+        $layout_content = getTemplate('templates/layout.php', [
+            'head' => $head,
+            'header' => $header,
+            'content' => $main_content,
+            'footer' => $footer
+        ]);
+    }
 
     print($layout_content);
 ?>
