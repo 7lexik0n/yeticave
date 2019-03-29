@@ -23,18 +23,23 @@
     ];
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $form = $_POST;
+        $info = $_POST;
         $required = ['email', 'password', 'name', 'contacts'];
         $errors = [];
         foreach($required as $key) {
-            if(empty($form[$key])) {   
+            if(empty($info[$key])) {   
                 $errors[$key] = 'Это поле нужно заполнить!';
             }
         };
-        if (empty($form['avatar'])) {
-            $errors['avatar'] = 'Добавьте аватар!';
+        if (isset($_FILES['avatar'])) {
+            $tmp_name = $_FILES['avatar']['tmp_name'];
+            $path = $_FILES['avatar']['name'];
+            move_uploaded_file($tmp_name, 'img/' . $path);
+            $info['path'] = 'img/' . $path;
         }
-        $info = $form;
+        else {
+            $errors['avatar'] = 'Вы не загрузили файл!';
+        };
         if (count($errors)) {
             $addOptions = [
                 'errors' => $errors,
@@ -44,7 +49,47 @@
             $content = getTemplate('templates/signUp.php', $options);
             print($content);
         } else {
-            header("Location: /index.php");
+            $con = mysqli_connect("localhost", "root", "", "yeticave");
+            if (!$con) {
+                header("Location: /index.php");
+                exit();
+            } else {
+                $safe_email = mysqli_real_escape_string($con, $info['email']);                
+                $sql = 'SELECT email from users where email = "' . $info['email'] . '"';
+                $result = mysqli_query($con, $sql);
+                if (!$result) {
+                    header("Location: /index.php");
+                    exit();  
+                } else {
+                    $email = mysqli_fetch_assoc($result);
+                    if (count($email)) {
+                        $errors['email'] = 'Пользователь с таким email уже существует!';
+                        $addOptions = [
+                            'errors' => $errors,
+                            'info' => $info
+                        ];
+                        $options += $addOptions;
+                        $content = getTemplate('templates/signUp.php', $options);
+                        print($content);
+                    } else {
+                        $safe_name = mysqli_real_escape_string($con, $info['name']);
+                        $safe_password = mysqli_real_escape_string($con, $info['password']);
+                        $hash_password = password_hash($safe_password, PASSWORD_DEFAULT);
+                        $safe_avatar = mysqli_real_escape_string($con, $info['path']);
+                        $safe_contacts = mysqli_real_escape_string($con, $info['contacts']);
+                        $date = date("Y-m-d H:i:s");
+                        $sql = 'INSERT INTO users SET registry = "' . $date . '", email = "' . $safe_email . '", name = "' . $safe_name . '", password = "' . $hash_password . '", avatar = "' . $safe_avatar . '", contacts = "' . $safe_contacts . '", lotsID = "", ratesID = ""';
+                        $result = mysqli_query($con, $sql);
+                        if (!$result) {
+                            print(mysqli_error($con));
+                            exit();  
+                        } else {
+                            header("Location: /index.php");
+                            exit();
+                        }
+                    }
+                }
+            }
 		    exit();        
         } 
     }

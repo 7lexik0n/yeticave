@@ -3,7 +3,7 @@
 
     require_once('functions.php');
     require_once('categories.php');
-    require_once('userdata.php');    
+    require_once('userdata.php');     
 
     $head = getTemplate('templates/head.php', [
         'title' => 'YetiCave Вход'
@@ -46,27 +46,48 @@
             ];
             $options += $addOptions;
             $content = getTemplate('templates/login.php', $options);
-        } elseif ($user = searchUserByEmail($form['email'], $users)) {
-            if (password_verify($form['password'], $user['password'])) {
-                $_SESSION['user'] = $user;
-                header("Location: /index.php");
-		        exit();        
-            }
-            else {
-                $errors['password'] = 'Пароль не верен!';
-                $addOptions = [
-                    'errors' => $errors
-                ];
-                $options += $addOptions;
-                $content = getTemplate('templates/login.php', $options);
-            }
         } else {
-            $errors['email'] = 'Пользователь не найден!';
-            $addOptions = [
-                'errors' => $errors
-            ];
-            $options += $addOptions;
-            $content = getTemplate('templates/login.php', $options);            
+            $con = mysqli_connect('localhost', 'root', '', 'yeticave');
+            if (!$con) {
+                header("Location: /index.php");
+                exit();
+            } else {                
+                $sql = 'SELECT * from users where email = "' . $form['email'] . '"';
+                $result = mysqli_query($con, $sql);
+                if (!$result) {
+                    header("Location: /index.php");
+                    exit();  
+                } else {
+                    $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+                    if (count($rows)) {
+                        $userData = $rows[0];
+                        if (password_verify($form['password'], $userData['password'])) {
+                            $user = [
+                                'email' => $userData['email'],
+                                'name' => $userData['name'],
+                                'avatar' => $userData['avatar']
+                            ];
+                            $_SESSION['user'] = $user;
+                            header("Location: /index.php");
+                            exit();
+                        } else {
+                            $errors['password'] = 'Пароль не верен!';
+                            $addOptions = [
+                                'errors' => $errors
+                            ];
+                            $options += $addOptions;
+                            $content = getTemplate('templates/login.php', $options);
+                        }
+                    } else {
+                        $errors['email'] = 'Пользователь с таким email не найден!';
+                        $addOptions = [
+                            'errors' => $errors
+                        ];
+                        $options += $addOptions;
+                        $content = getTemplate('templates/login.php', $options);
+                    }
+                }
+            }
         }
         print($content);
     } else {

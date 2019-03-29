@@ -41,6 +41,10 @@ body {
   overflow-x: hidden;
 }
 
+main {
+    min-height: 56vh;
+}
+
 a {
   text-decoration: none;
 }
@@ -830,7 +834,7 @@ input:invalid .form__error{
 }
 
 .form__error--bottom {
-  display: none;
+  display: block;
   margin-bottom: 15px;
   font-size: 16px;
 }

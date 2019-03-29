@@ -19,7 +19,7 @@
         <?php if (isset($user['name'])) : ?>
 
         <div class="user-menu__image">
-            <img src="../img/avatar.jpg" src="40" height="40" alt="Пользователь">
+            <img src="../<?php if (isset($user['avatar'])) : print($user['avatar']); else : print('img/avatar.jpg'); endif; ?>" src="40" height="40" alt="Пользователь">
         </div>
         <div class="user-menu__logged">
             <p>Добро пожаловать, <?=$user['name']?></p>
