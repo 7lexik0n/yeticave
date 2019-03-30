@@ -28,6 +28,15 @@
         'catContent' => $catContent,
         'footer' => $footer
     ];
+
+    if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+        if (isset($_GET['registration'])) {
+            if ($_GET['registration'] == 'success') {
+                $regMeassage = 'Теперь вы можете войти, введя свои данные в форму.';
+                $options['regMess'] = $regMeassage;
+            }
+        }
+    }
     
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $form = $_POST;

@@ -31,14 +31,25 @@
                 $errors[$key] = 'Это поле нужно заполнить!';
             }
         };
-        if (isset($_FILES['avatar'])) {
+        $emailValidator = filter_var($info['email'], FILTER_VALIDATE_EMAIL);
+        if (!$emailValidator) {
+            $errors['email'] = 'Введите валидный email!';
+        }
+        if ($_FILES['avatar']['error'] == 4) {
+            $errors['avatar'] = 'Вы не загрузили файл!';
+        } else {
             $tmp_name = $_FILES['avatar']['tmp_name'];
             $path = $_FILES['avatar']['name'];
-            move_uploaded_file($tmp_name, 'img/' . $path);
-            $info['path'] = 'img/' . $path;
-        }
-        else {
-            $errors['avatar'] = 'Вы не загрузили файл!';
+            
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $file_type = finfo_file($finfo, $tmp_name);
+            if (($file_type == 'image/gif') OR (($file_type == 'image/png')) OR ($file_type == 'image/jpeg')) {
+                move_uploaded_file($tmp_name, 'img/' . $path);
+                $info['path'] = 'img/' . $path;
+            }
+            else {
+                $errors['avatar'] = 'Загрузите аватар в формате GIF, PNG или JPEG!';
+            }
         };
         if (count($errors)) {
             $addOptions = [
@@ -83,8 +94,8 @@
                         if (!$result) {
                             print(mysqli_error($con));
                             exit();  
-                        } else {
-                            header("Location: /index.php");
+                        } else {  
+                            header("Location: /login.php?registration=success");
                             exit();
                         }
                     }

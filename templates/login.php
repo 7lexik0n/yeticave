@@ -4,6 +4,7 @@
     $catContent = $templateData['catContent'];
     $footer = $templateData['footer'];
     $errors = $templateData['errors'] ?? [];
+    $regMes = $templateData['regMess'] ?? '';
 ?>
 
 <!DOCTYPE html>
@@ -23,6 +24,7 @@
   </nav>
   <form class="form container" action="../login.php" method="post" <?php if(count($errors)) : ?>class="form--invalid"<?php endif; ?> >
     <h2>Вход</h2>
+    <p><?=$regMes;?></p>
     <div class="form__item <?php if (array_key_exists('email', $errors)): ?>form__item--invalid<?php endif;?>"> <!-- form__item--invalid -->
       <label for="email">E-mail</label>
       <input id="email" type="text" name="email" placeholder="Введите e-mail">
